@@ -1,0 +1,89 @@
+{% extends "admin/base.html" %}
+{% block title %}商品管理 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>商品管理</h1>
+    <div class="muted">维护商品、价格、库存和状态</div>
+  </div>
+</div>
+
+<section class="grid two">
+  <div class="panel">
+    <h2>商品筛选</h2>
+    <form method="get" action="/admin/products" style="margin-bottom:14px;">
+      <div class="form-row">
+        <label>关键词<input name="q" value="{{ filters.q }}" placeholder="名称 / SKU / 描述"></label>
+        <label>分类<input name="category" value="{{ filters.category }}" placeholder="例如 数码办公"></label>
+      </div>
+      <div class="form-row">
+        <label>状态
+          <select name="status">
+            <option value="" {{ "selected" if not filters.status else "" }}>全部状态</option>
+            <option value="active" {{ "selected" if filters.status == "active" else "" }}>上架</option>
+            <option value="draft" {{ "selected" if filters.status == "draft" else "" }}>草稿</option>
+            <option value="archived" {{ "selected" if filters.status == "archived" else "" }}>归档</option>
+          </select>
+        </label>
+        <label>库存
+          <select name="low_stock">
+            <option value="false" {{ "selected" if not filters.low_stock else "" }}>全部库存</option>
+            <option value="true" {{ "selected" if filters.low_stock else "" }}>仅低库存</option>
+          </select>
+        </label>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="button" type="submit">筛选商品</button>
+        <a class="link" href="/admin/products">清除筛选</a>
+      </div>
+    </form>
+
+    <h2>商品列表</h2>
+    <table>
+      <thead><tr><th>图片</th><th>SKU</th><th>商品</th><th>分类</th><th>价格</th><th>库存/阈值</th><th>状态</th><th></th></tr></thead>
+      <tbody>
+      {% for product in products %}
+        <tr>
+          <td>{% if product.image_url %}<img class="thumb" src="{{ product.image_url }}" alt="{{ product.name }}">{% else %}<span class="muted">未设置</span>{% endif %}</td>
+          <td>{{ product.sku }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.price }} {{ product.currency }}</td>
+          <td>{{ product.stock_on_hand }} / {{ product.low_stock_threshold }}</td>
+          <td><span class="badge">{{ product.status | product_status_label }}</span></td>
+          <td><a class="link" href="/admin/products/{{ product.sku }}/edit">编辑</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="muted">暂无商品</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>创建商品</h2>
+    <form method="post" action="/admin/products">
+      <label>SKU<input name="sku" required maxlength="64" placeholder="例如 BAG-001"></label>
+      <label>商品名称<input name="name" required maxlength="200" placeholder="例如 通勤托特包"></label>
+      <div class="form-row">
+        <label>分类<input name="category" required maxlength="120" placeholder="例如 bags"></label>
+        <label>状态
+          <select name="status">
+            <option value="active">上架</option>
+            <option value="draft">草稿</option>
+            <option value="archived">归档</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>价格<input name="price" required inputmode="decimal" placeholder="199.00"></label>
+        <label>库存<input name="stock_on_hand" required type="number" min="0" value="10"></label>
+      </div>
+      <label>低库存阈值<input name="low_stock_threshold" required type="number" min="0" value="10"></label>
+      <label>图片 URL<input name="image_url" maxlength="500" placeholder="/media/products/example.jpg 或 https://..."></label>
+      <label>描述<textarea name="description" maxlength="2000"></textarea></label>
+      <button class="button" type="submit">保存商品</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

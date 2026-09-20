@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% block title %}报表中心 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>报表中心</h1>
+    <div class="muted">运营、交易、售后和接口访问汇总</div>
+  </div>
+  <a class="link" href="/admin/reports/export">导出报表 CSV</a>
+</div>
+
+<section class="grid stats">
+  <div class="panel"><div class="muted">累计销售额</div><div class="stat-value">{{ total_revenue }} CNY</div></div>
+  <div class="panel"><div class="muted">订单数</div><div class="stat-value">{{ order_count }}</div></div>
+  <div class="panel"><div class="muted">客户数</div><div class="stat-value">{{ customer_count }}</div></div>
+  <div class="panel"><div class="muted">低库存商品</div><div class="stat-value">{{ low_stock_count }}</div></div>
+  <div class="panel"><div class="muted">支付记录</div><div class="stat-value">{{ payment_count }}</div></div>
+  <div class="panel"><div class="muted">退款记录</div><div class="stat-value">{{ refund_count }}</div></div>
+  <div class="panel"><div class="muted">售后申请</div><div class="stat-value">{{ return_count }}</div></div>
+  <div class="panel"><div class="muted">API 访问</div><div class="stat-value">{{ api_access_count }}</div></div>
+</section>
+
+<section class="panel" style="margin-top:14px;">
+  <h2>订单状态分布</h2>
+  <table>
+    <thead><tr><th>状态</th><th>订单数</th></tr></thead>
+    <tbody>
+    {% for item in status_counts %}
+      <tr><td>{{ item.status | order_status_label }}</td><td>{{ item.count }}</td></tr>
+    {% else %}
+      <tr><td colspan="2" class="muted">暂无订单</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

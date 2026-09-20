@@ -1,0 +1,19 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+logs/
+downloads/
+runtime/
+test-results/
+playwright-report/
+
+# Local runtime and generated metadata
+dump.rdb
+.idea/
+*.egg-info/

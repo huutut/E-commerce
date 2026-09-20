@@ -1,0 +1,77 @@
+{% extends "admin/base.html" %}
+{% block title %}流程测试 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>流程测试</h1>
+    <div class="muted">创建客户、加入购物车并完成结账</div>
+  </div>
+</div>
+
+<section class="grid two">
+  <div class="panel">
+    <h2>测试客户</h2>
+    <form method="post" action="/admin/sandbox/customers">
+      <label>邮箱<input name="email" type="email" required value="{{ customer.email if customer else 'buyer@example.com' }}"></label>
+      <label>姓名<input name="full_name" required value="{{ customer.full_name if customer else '测试买家' }}"></label>
+      <button class="button" type="submit">创建或载入客户</button>
+    </form>
+
+    {% if customer %}
+      <div style="margin-top:14px;">
+        <div class="muted">当前客户</div>
+        <strong>{{ customer.full_name }}</strong>
+        <div>{{ customer.email }}</div>
+        <div class="muted">{{ customer.id }}</div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <h2>加入购物车</h2>
+    {% if customer %}
+      <form method="post" action="/admin/sandbox/cart">
+        <input type="hidden" name="customer_id" value="{{ customer.id }}">
+        <label>商品
+          <select name="sku">
+            {% for product in products %}
+              <option value="{{ product.sku }}">{{ product.name }} / {{ product.sku }} / 库存 {{ product.stock_on_hand }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>数量<input name="quantity" type="number" min="1" value="1" required></label>
+        <button class="button" type="submit">加入购物车</button>
+      </form>
+    {% else %}
+      <p class="muted">先创建或载入客户</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="panel" style="margin-top:14px;">
+  <h2>当前购物车</h2>
+  {% if cart and cart.items %}
+    <table>
+      <thead><tr><th>SKU</th><th>商品</th><th>数量</th><th>单价</th><th>小计</th></tr></thead>
+      <tbody>
+      {% for item in cart.items %}
+        <tr>
+          <td>{{ item.sku }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.unit_price }}</td>
+          <td>{{ item.line_total }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <form method="post" action="/admin/sandbox/checkout" style="margin-top:14px; max-width:260px;">
+      <input type="hidden" name="customer_id" value="{{ customer.id }}">
+      <div><strong>合计：{{ cart.total_amount }} {{ cart.currency }}</strong></div>
+      <button class="button" type="submit">提交订单</button>
+    </form>
+  {% else %}
+    <p class="muted">购物车为空</p>
+  {% endif %}
+</section>
+{% endblock %}

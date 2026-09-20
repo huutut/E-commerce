@@ -1,0 +1,31 @@
+{% extends "store/base.html" %}
+{% block title %}订单确认 - 中文电商商城{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>订单已创建</h1>
+  <p class="muted">订单号 {{ order.id }}，当前状态 {{ order.status.value }}。</p>
+  <table>
+    <thead><tr><th>商品</th><th>数量</th><th>单价</th><th>小计</th></tr></thead>
+    <tbody>
+    {% for line in lines %}
+      <tr>
+        <td>{{ line.name }}</td>
+        <td>{{ line.quantity }}</td>
+        <td>{{ line.unit_price }}</td>
+        <td>{{ line.line_total }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p><strong>订单金额 {{ order.total_amount }} {{ order.currency }}</strong></p>
+  {% if payment_created %}
+    <p class="muted">支付会话已创建，请根据页面提示完成支付。</p>
+  {% endif %}
+  {% if order.status.value == "created" %}
+    <form method="post" action="/store/orders/{{ order.id }}/payments">
+      <button class="button" type="submit">发起支付</button>
+    </form>
+  {% endif %}
+  <p><a class="link" href="/store">继续购物</a></p>
+</section>
+{% endblock %}

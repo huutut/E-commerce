@@ -1,0 +1,90 @@
+{% extends "admin/base.html" %}
+{% block title %}编辑商品 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>编辑商品</h1>
+    <div class="muted">{{ product.sku }}</div>
+  </div>
+  <a class="link" href="/admin/products">返回商品列表</a>
+</div>
+
+<section class="grid two">
+  <div class="panel">
+    <h2>商品信息</h2>
+    <form method="post" action="/admin/products/{{ product.sku }}">
+      <label>商品名称<input name="name" required maxlength="200" value="{{ product.name }}"></label>
+      <div class="form-row">
+        <label>分类<input name="category" required maxlength="120" value="{{ product.category }}"></label>
+        <label>状态
+          <select name="status">
+            <option value="active" {{ "selected" if product.status.value == "active" else "" }}>上架</option>
+            <option value="draft" {{ "selected" if product.status.value == "draft" else "" }}>草稿</option>
+            <option value="archived" {{ "selected" if product.status.value == "archived" else "" }}>归档</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>价格<input name="price" required inputmode="decimal" value="{{ product.price }}"></label>
+        <label>库存<input name="stock_on_hand" required type="number" min="0" value="{{ product.stock_on_hand }}"></label>
+      </div>
+      <label>低库存阈值<input name="low_stock_threshold" required type="number" min="0" value="{{ product.low_stock_threshold }}"></label>
+      <label>图片 URL<input name="image_url" maxlength="500" value="{{ product.image_url }}" placeholder="/media/products/example.jpg 或 https://..."></label>
+      <label>描述<textarea name="description" maxlength="2000">{{ product.description }}</textarea></label>
+      <button class="button" type="submit">保存修改</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>商品图片</h2>
+    {% if product.image_url %}
+      <p><img src="{{ product.image_url }}" alt="{{ product.name }}" style="width:100%; max-height:240px; object-fit:cover; border-radius:8px; border:1px solid var(--line);"></p>
+    {% else %}
+      <p class="muted">暂未上传商品图片。</p>
+    {% endif %}
+    <form method="post" action="/admin/products/{{ product.sku }}/image" enctype="multipart/form-data">
+      <label>上传图片<input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required></label>
+      <button class="button" type="submit">上传并绑定图片</button>
+    </form>
+
+    <h2 style="margin-top:16px;">库存状态</h2>
+    <table>
+      <tbody>
+        <tr><td>当前库存</td><td>{{ product.stock_on_hand }}</td></tr>
+        <tr><td>低库存阈值</td><td>{{ product.low_stock_threshold }}</td></tr>
+        <tr><td>销售状态</td><td><span class="badge">{{ product.status | product_status_label }}</span></td></tr>
+        <tr><td>售价</td><td>{{ product.price }} {{ product.currency }}</td></tr>
+      </tbody>
+    </table>
+    <h2 style="margin-top:16px;">库存调整</h2>
+    <form method="post" action="/admin/products/{{ product.sku }}/inventory">
+      <label>调整数量
+        <input name="change_quantity" required type="number" placeholder="入库填正数，出库填负数">
+      </label>
+      <label>调整原因<textarea name="reason" required maxlength="500" placeholder="例如 采购入库、盘点修正、损耗出库"></textarea></label>
+      <button class="button" type="submit">提交库存调整</button>
+    </form>
+  </div>
+</section>
+
+<section class="panel" style="margin-top:14px;">
+  <h2>库存调整记录</h2>
+  <table>
+    <thead><tr><th>时间</th><th>操作人</th><th>变动</th><th>调整前</th><th>调整后</th><th>原因</th></tr></thead>
+    <tbody>
+    {% for item in adjustments %}
+      <tr>
+        <td>{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td>{{ item.actor_email }}</td>
+        <td>{{ item.change_quantity }}</td>
+        <td>{{ item.stock_before }}</td>
+        <td>{{ item.stock_after }}</td>
+        <td>{{ item.reason }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">暂无库存调整记录</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

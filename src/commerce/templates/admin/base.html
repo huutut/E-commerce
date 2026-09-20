@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}电商运营后台{% endblock %}</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f9;
+        --panel: #ffffff;
+        --line: #dfe3e8;
+        --text: #1d2733;
+        --muted: #667085;
+        --accent: #0f766e;
+        --accent-strong: #115e59;
+        --warn: #b45309;
+        --danger: #b42318;
+        --ok: #047857;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-width: 320px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .shell { min-height: 100vh; display: grid; grid-template-columns: 220px 1fr; }
+      .sidebar {
+        background: #17202b;
+        color: #f8fafc;
+        padding: 20px 14px;
+      }
+      .brand { font-size: 18px; font-weight: 700; margin: 0 0 20px; }
+      .nav { display: grid; gap: 6px; }
+      .nav a {
+        color: #cbd5e1;
+        text-decoration: none;
+        padding: 10px 12px;
+        border-radius: 6px;
+        display: block;
+      }
+      .nav a.active, .nav a:hover { background: #243244; color: #fff; }
+
+      .main { padding: 22px; }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+      .account {
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px solid #334155;
+        color: #cbd5e1;
+        display: grid;
+        gap: 8px;
+        overflow-wrap: anywhere;
+      }
+      .account form { display: block; }
+      .ghost-button {
+        border: 1px solid #475569;
+        border-radius: 6px;
+        background: transparent;
+        color: #f8fafc;
+        padding: 8px 10px;
+        font: inherit;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+      }
+      .ghost-button:hover { background: #243244; }
+      h1 { font-size: 24px; margin: 0; letter-spacing: 0; }
+      h2 { font-size: 16px; margin: 0 0 12px; letter-spacing: 0; }
+      .muted { color: var(--muted); }
+
+      .grid { display: grid; gap: 14px; }
+      .stats { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+      .two { grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr); }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+        overflow-x: auto;
+      }
+      .stat-value { font-size: 28px; font-weight: 700; margin-top: 6px; }
+      .status-ok { color: var(--ok); font-weight: 700; }
+      .status-warn { color: var(--warn); font-weight: 700; }
+
+      table { width: 100%; min-width: 720px; border-collapse: collapse; }
+      th, td { border-bottom: 1px solid var(--line); padding: 10px 8px; text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-weight: 600; background: #fafbfc; }
+      tr:last-child td { border-bottom: 0; }
+
+      form { display: grid; gap: 12px; }
+      label { display: grid; gap: 6px; color: var(--muted); font-weight: 600; }
+      input, select, textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 9px 10px;
+        font: inherit;
+        color: var(--text);
+        background: #fff;
+      }
+      textarea { min-height: 82px; resize: vertical; }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .button {
+        border: 0;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .button:hover { background: var(--accent-strong); }
+      .link { color: var(--accent-strong); font-weight: 700; text-decoration: none; }
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 2px 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        background: #f8fafc;
+      }
+      .thumb {
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #f8fafc;
+      }
+
+      @media (max-width: 900px) {
+        .shell { grid-template-columns: 1fr; }
+        .sidebar { position: static; }
+        .stats, .two, .form-row { grid-template-columns: 1fr; }
+        .main { padding: 14px; }
+        h1 { font-size: 21px; }
+        table { min-width: 640px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <p class="brand">电商运营后台</p>
+        <nav class="nav">
+          <a class="{{ 'active' if active == 'dashboard' else '' }}" href="/admin">首页</a>
+          <a class="{{ 'active' if active == 'products' else '' }}" href="/admin/products">商品管理</a>
+          <a class="{{ 'active' if active == 'orders' else '' }}" href="/admin/orders">订单管理</a>
+          <a class="{{ 'active' if active == 'customers' else '' }}" href="/admin/customers">客户管理</a>
+          <a class="{{ 'active' if active == 'sandbox' else '' }}" href="/admin/sandbox">流程测试</a>
+          <a class="{{ 'active' if active == 'reports' else '' }}" href="/admin/reports">报表中心</a>
+          <a class="{{ 'active' if active == 'audit' else '' }}" href="/admin/audit">审计日志</a>
+          <a class="{{ 'active' if active == 'admins' else '' }}" href="/admin/admins">管理员</a>
+          <a class="{{ 'active' if active == 'api_keys' else '' }}" href="/admin/api-keys">API Key</a>
+          <a class="{{ 'active' if active == 'account' else '' }}" href="/admin/account">账号安全</a>
+          <a href="/docs">接口文档</a>
+        </nav>
+        {% if current_admin %}
+        <div class="account">
+          <div>
+            <strong>{{ current_admin.full_name }}</strong>
+            <div>{{ current_admin.email }}</div>
+          </div>
+          <form method="post" action="/admin/logout">
+            <button class="ghost-button" type="submit">退出登录</button>
+          </form>
+        </div>
+        {% endif %}
+      </aside>
+      <main class="main">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>

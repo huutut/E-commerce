@@ -1,0 +1,159 @@
+{% extends "admin/base.html" %}
+{% block title %}订单详情 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>订单详情</h1>
+    <div class="muted">{{ order.id }}</div>
+  </div>
+  <a class="link" href="/admin/orders">返回订单列表</a>
+</div>
+
+<section class="grid two">
+  <div class="panel">
+    <h2>订单明细</h2>
+    <table>
+      <thead><tr><th>SKU</th><th>商品</th><th>数量</th><th>单价</th><th>小计</th></tr></thead>
+      <tbody>
+      {% for line in order.lines %}
+        <tr>
+          <td>{{ line.sku }}</td>
+          <td>{{ line.name }}</td>
+          <td>{{ line.quantity }}</td>
+          <td>{{ line.unit_price }}</td>
+          <td>{{ line.line_total }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>订单信息</h2>
+    <table>
+      <tbody>
+        <tr><td>客户 ID</td><td><a class="link" href="/admin/customers/{{ order.customer_id }}">{{ order.customer_id }}</a></td></tr>
+        <tr><td>状态</td><td><span class="badge">{{ order.status | order_status_label }}</span></td></tr>
+        <tr><td>订单金额</td><td>{{ order.total_amount }} {{ order.currency }}</td></tr>
+        <tr><td>承运商</td><td>{{ order.shipping_carrier or "未填写" }}</td></tr>
+        <tr><td>物流单号</td><td>{{ order.tracking_number or "未填写" }}</td></tr>
+        <tr><td>发货时间</td><td>{{ order.shipped_at.strftime("%Y-%m-%d %H:%M") if order.shipped_at else "未发货" }}</td></tr>
+      </tbody>
+    </table>
+    {% if order.status.value == "created" %}
+      <h2 style="margin-top:16px;">模拟支付</h2>
+      <form method="post" action="/admin/orders/{{ order.id }}/payments/mock">
+        <button class="button" type="submit">模拟支付成功</button>
+      </form>
+    {% endif %}
+    <h2 style="margin-top:16px;">备注与物流</h2>
+    <form method="post" action="/admin/orders/{{ order.id }}/fulfillment">
+      <label>运营备注<textarea name="note" maxlength="500">{{ order.note }}</textarea></label>
+      <label>承运商<input name="shipping_carrier" maxlength="120" value="{{ order.shipping_carrier }}" placeholder="例如 顺丰速运"></label>
+      <label>物流单号<input name="tracking_number" maxlength="120" value="{{ order.tracking_number }}" placeholder="例如 SF123456789"></label>
+      <button class="button" type="submit">保存备注与物流</button>
+    </form>
+    {% if next_statuses %}
+      <h2 style="margin-top:16px;">状态流转</h2>
+      <div style="display:flex; flex-wrap:wrap; gap:10px;">
+        {% for status in next_statuses %}
+          <form method="post" action="/admin/orders/{{ order.id }}/status">
+            <input type="hidden" name="status" value="{{ status.value }}">
+            {% if status.value == "fulfilled" %}
+              <input type="hidden" name="shipping_carrier" value="{{ order.shipping_carrier }}">
+              <input type="hidden" name="tracking_number" value="{{ order.tracking_number }}">
+            {% endif %}
+            <button class="button" type="submit">标记为{{ status | order_status_label }}</button>
+          </form>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted" style="margin-top:16px;">当前订单状态不可继续流转</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="panel" style="margin-top:14px;">
+  <h2>支付记录</h2>
+  <table>
+    <thead><tr><th>时间</th><th>渠道</th><th>状态</th><th>金额</th><th>流水号</th><th>支付链接</th></tr></thead>
+    <tbody>
+    {% for payment in payments %}
+      <tr>
+        <td>{{ payment.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td>{{ payment.provider }}</td>
+        <td><span class="badge">{{ payment.status | payment_status_label }}</span></td>
+        <td>{{ payment.amount }} {{ payment.currency }}</td>
+        <td>{{ payment.reference }}</td>
+        <td>{% if payment.checkout_url %}<a class="link" href="{{ payment.checkout_url }}">打开</a>{% else %}<span class="muted">无</span>{% endif %}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">暂无支付记录</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel" style="margin-top:14px;">
+  <h2>物流运单</h2>
+  <table>
+    <thead><tr><th>时间</th><th>服务商</th><th>承运商</th><th>物流单号</th><th>状态</th><th>轨迹</th></tr></thead>
+    <tbody>
+    {% for shipment in shipments %}
+      <tr>
+        <td>{{ shipment.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td>{{ shipment.provider }}</td>
+        <td>{{ shipment.carrier }}</td>
+        <td>{{ shipment.tracking_number }}</td>
+        <td><span class="badge">{{ shipment.status.value }}</span></td>
+        <td>{% if shipment.tracking_url %}<a class="link" href="{{ shipment.tracking_url }}">查看轨迹</a>{% else %}<span class="muted">暂无</span>{% endif %}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">暂无物流运单</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="grid two" style="margin-top:14px;">
+  <div class="panel">
+    <h2>售后申请</h2>
+    <form method="post" action="/admin/orders/{{ order.id }}/returns">
+      <label>售后原因<textarea name="reason" required maxlength="500" placeholder="例如 客户申请退货、商品破损、订单取消退款"></textarea></label>
+      <button class="button" type="submit">创建售后申请</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>售后记录</h2>
+    <table>
+      <thead><tr><th>时间</th><th>状态</th><th>原因</th><th>处理</th></tr></thead>
+      <tbody>
+      {% for item in returns %}
+        <tr>
+          <td>{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+          <td><span class="badge">{{ item.status | return_status_label }}</span></td>
+          <td>{{ item.reason }}</td>
+          <td>
+            {% if item.status.value in ["requested", "approved"] %}
+              <form method="post" action="/admin/orders/{{ order.id }}/returns/{{ item.id }}/status">
+                <label>处理备注<input name="resolution_note" maxlength="500" value="{{ item.resolution_note }}"></label>
+                <select name="status">
+                  <option value="approved">已批准</option>
+                  <option value="completed">已完成并退款</option>
+                  <option value="rejected">已拒绝</option>
+                </select>
+                <button class="button" type="submit">更新售后</button>
+              </form>
+            {% else %}
+              {{ item.resolution_note or "已结束" }}
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="muted">暂无售后记录</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

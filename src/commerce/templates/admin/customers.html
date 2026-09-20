@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block title %}客户管理 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>客户管理</h1>
+    <div class="muted">查看客户资料、订单数和累计消费</div>
+  </div>
+  <a class="link" href="/admin/sandbox">创建测试客户</a>
+</div>
+
+<section class="panel">
+  <h2>客户搜索</h2>
+  <form method="get" action="/admin/customers" style="margin-bottom:14px;">
+    <div class="form-row">
+      <label>关键词<input name="q" value="{{ filters.q }}" placeholder="姓名 / 邮箱"></label>
+      <label>快捷操作
+        <div style="display:flex; gap:10px; align-items:center; min-height:39px;">
+          <button class="button" type="submit">搜索客户</button>
+          <a class="link" href="/admin/customers">清除搜索</a>
+        </div>
+      </label>
+    </div>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>客户</th>
+        <th>邮箱</th>
+        <th>订单数</th>
+        <th>累计消费</th>
+        <th>最近下单</th>
+        <th>创建时间</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for customer in customers %}
+      <tr>
+        <td>{{ customer.full_name }}</td>
+        <td>{{ customer.email }}</td>
+        <td>{{ customer.order_count }}</td>
+        <td>{{ customer.total_spent }} CNY</td>
+        <td>{{ customer.last_order_at.strftime("%Y-%m-%d %H:%M") if customer.last_order_at else "暂无" }}</td>
+        <td>{{ customer.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td><a class="link" href="/admin/customers/{{ customer.id }}">查看</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">暂无客户</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

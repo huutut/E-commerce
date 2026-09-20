@@ -1,0 +1,100 @@
+{% extends "admin/base.html" %}
+{% block title %}API Key 管理 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>API Key 管理</h1>
+    <div class="muted">控制外部系统访问 /api/v1 接口</div>
+  </div>
+</div>
+
+{% if created_key %}
+<section class="panel" style="margin-bottom:14px;">
+  <h2>新 API Key</h2>
+  <p class="status-warn">请立即保存，离开此页面后不会再次显示完整密钥。</p>
+  <input readonly value="{{ created_key }}" onclick="this.select()">
+</section>
+{% endif %}
+
+<section class="grid two">
+  <div class="panel">
+    <h2>API Key 列表</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>名称</th>
+          <th>前缀</th>
+          <th>状态</th>
+          <th>最近使用</th>
+          <th>创建人</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for item in api_keys %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.key_prefix }}</td>
+          <td><span class="badge">{{ "启用" if item.is_active else "停用" }}</span></td>
+          <td>{{ item.last_used_at.strftime("%Y-%m-%d %H:%M") if item.last_used_at else "尚未使用" }}</td>
+          <td>{{ item.created_by_email }}</td>
+          <td>
+            {% if item.is_active %}
+              <form method="post" action="/admin/api-keys/{{ item.id }}/status">
+                <input type="hidden" name="action" value="deactivate">
+                <button class="button" type="submit">停用</button>
+              </form>
+            {% else %}
+              <form method="post" action="/admin/api-keys/{{ item.id }}/status">
+                <input type="hidden" name="action" value="activate">
+                <button class="button" type="submit">启用</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" class="muted">暂无 API Key</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>创建 API Key</h2>
+    <form method="post" action="/admin/api-keys">
+      <label>名称<input name="name" required maxlength="120" placeholder="例如 小程序后端"></label>
+      <button class="button" type="submit">生成 API Key</button>
+    </form>
+  </div>
+</section>
+
+<section class="panel" style="margin-top:14px;">
+  <h2>最近 API 访问</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>时间</th>
+        <th>Key 前缀</th>
+        <th>方法</th>
+        <th>路径</th>
+        <th>状态</th>
+        <th>状态码</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for log in access_logs %}
+      <tr>
+        <td>{{ log.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td>{{ log.key_prefix or "未知" }}</td>
+        <td>{{ log.method }}</td>
+        <td>{{ log.path }}</td>
+        <td><span class="badge">{{ log.status }}</span></td>
+        <td>{{ log.status_code }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">暂无 API 访问记录</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

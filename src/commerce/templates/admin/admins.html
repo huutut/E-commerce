@@ -1,0 +1,98 @@
+{% extends "admin/base.html" %}
+{% block title %}管理员管理 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>管理员管理</h1>
+    <div class="muted">维护后台账号、角色和启停状态</div>
+  </div>
+</div>
+
+<section class="grid two">
+  <div class="panel">
+    <h2>管理员列表</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>姓名</th>
+          <th>邮箱</th>
+          <th>角色</th>
+          <th>状态</th>
+          <th>创建时间</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for admin in admins %}
+        <tr>
+          <td>{{ admin.full_name }}</td>
+          <td>{{ admin.email }}</td>
+          <td>
+            <form method="post" action="/admin/admins/{{ admin.id }}/role">
+              <select name="role" onchange="this.form.submit()">
+                <option value="owner" {{ "selected" if admin.role.value == "owner" else "" }}>所有者</option>
+                <option value="operator" {{ "selected" if admin.role.value == "operator" else "" }}>运营员</option>
+              </select>
+            </form>
+          </td>
+          <td><span class="badge">{{ "启用" if admin.is_active else "停用" }}</span></td>
+          <td>{{ admin.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+          <td>
+            {% if current_admin.id == admin.id %}
+              <span class="muted">当前账号</span>
+            {% elif admin.is_active %}
+              <form method="post" action="/admin/admins/{{ admin.id }}/status">
+                <input type="hidden" name="action" value="deactivate">
+                <button class="button" type="submit">停用</button>
+              </form>
+            {% else %}
+              <form method="post" action="/admin/admins/{{ admin.id }}/status">
+                <input type="hidden" name="action" value="activate">
+                <button class="button" type="submit">启用</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" class="muted">暂无管理员</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>创建管理员</h2>
+    <form method="post" action="/admin/admins">
+      <label>姓名<input name="full_name" required maxlength="200" placeholder="例如 运营同事"></label>
+      <label>邮箱<input name="email" required type="email" maxlength="320" placeholder="operator@example.com"></label>
+      <label>初始密码<input name="password" required type="password" minlength="8" autocomplete="new-password"></label>
+      <label>角色
+        <select name="role">
+          <option value="operator">运营员</option>
+          <option value="owner">所有者</option>
+        </select>
+      </label>
+      <button class="button" type="submit">创建管理员</button>
+    </form>
+  </div>
+</section>
+
+<section class="panel" style="margin-top:14px;">
+  <h2>权限矩阵</h2>
+  <table>
+    <thead><tr><th>角色</th><th>权限</th></tr></thead>
+    <tbody>
+      {% for role, permissions in role_permissions.items() %}
+        <tr>
+          <td>{{ role | admin_role_label }}</td>
+          <td>
+            {% for permission in all_permissions %}
+              <span class="badge" style="margin:0 6px 6px 0;">{{ "允许" if permission in permissions else "无" }} · {{ permission.value }}</span>
+            {% endfor %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

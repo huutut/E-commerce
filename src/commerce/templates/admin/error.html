@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }} - 电商运营后台</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f9;
+        --panel: #ffffff;
+        --line: #dfe3e8;
+        --text: #1d2733;
+        --muted: #667085;
+        --accent: #0f766e;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+      .error-panel {
+        width: min(520px, 100%);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 28px;
+      }
+      .status {
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      h1 {
+        font-size: 26px;
+        margin: 0 0 12px;
+        letter-spacing: 0;
+      }
+      p { margin: 0 0 18px; color: var(--muted); }
+      a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="error-panel">
+      <p class="status">HTTP {{ status_code }}</p>
+      <h1>{{ title }}</h1>
+      <p>{{ detail }}</p>
+      <a href="{{ back_url }}">{{ "返回后台首页" if current_admin else "返回登录页" }}</a>
+    </main>
+  </body>
+</html>

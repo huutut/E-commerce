@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% block title %}账号安全 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>账号安全</h1>
+    <div class="muted">修改当前管理员密码并查看会话状态</div>
+  </div>
+</div>
+
+<section class="grid two">
+  <div class="panel">
+    <h2>修改密码</h2>
+    {% if updated %}
+      <p class="status-ok">密码已更新。</p>
+    {% endif %}
+    {% if error == "current_password" %}
+      <p class="status-warn">当前密码不正确。</p>
+    {% elif error == "password_length" %}
+      <p class="status-warn">新密码至少需要 8 位。</p>
+    {% elif error == "password_confirm" %}
+      <p class="status-warn">两次输入的新密码不一致。</p>
+    {% endif %}
+    <form method="post" action="/admin/account/password">
+      <label>当前密码<input name="current_password" required type="password" autocomplete="current-password"></label>
+      <label>新密码<input name="new_password" required type="password" minlength="8" autocomplete="new-password"></label>
+      <label>确认新密码<input name="confirm_password" required type="password" minlength="8" autocomplete="new-password"></label>
+      <button class="button" type="submit">更新密码</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>当前账号</h2>
+    <table>
+      <tbody>
+        <tr><td>姓名</td><td>{{ current_admin.full_name }}</td></tr>
+        <tr><td>邮箱</td><td>{{ current_admin.email }}</td></tr>
+        <tr><td>角色</td><td>{{ current_admin.role | admin_role_label }}</td></tr>
+        <tr><td>状态</td><td>{{ "启用" if current_admin.is_active else "停用" }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

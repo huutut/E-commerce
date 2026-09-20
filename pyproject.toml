@@ -1,0 +1,48 @@
+[project]
+name = "commerce-platform"
+version = "0.1.0"
+description = "Industrial FastAPI commerce platform with SQLModel, PostgreSQL, Redis, and Playwright."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.116.0",
+    "uvicorn[standard]>=0.35.0",
+    "sqlmodel>=0.0.24",
+    "alembic>=1.17.0",
+    "pydantic-settings>=2.10.0",
+    "email-validator>=2.3.0",
+    "psycopg[binary]>=3.2.9",
+    "redis>=6.2.0",
+    "jinja2>=3.1.6",
+    "python-multipart>=0.0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+    "httpx>=0.28.0",
+    "pytest>=8.4.0",
+    "pytest-cov>=6.2.0",
+    "ruff>=0.12.0",
+    "mypy>=1.17.0",
+    "playwright>=1.54.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "e2e: browser tests that require Playwright browsers",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+strict = true
+mypy_path = ["src"]

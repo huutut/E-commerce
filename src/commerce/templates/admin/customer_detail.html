@@ -1,0 +1,56 @@
+{% extends "admin/base.html" %}
+{% block title %}客户详情 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>客户详情</h1>
+    <div class="muted">{{ customer.email }}</div>
+  </div>
+  <a class="link" href="/admin/customers">返回客户列表</a>
+</div>
+
+<section class="grid two">
+  <div class="panel">
+    <h2>客户资料</h2>
+    <table>
+      <tbody>
+        <tr><td>姓名</td><td>{{ customer.full_name }}</td></tr>
+        <tr><td>邮箱</td><td>{{ customer.email }}</td></tr>
+        <tr><td>客户 ID</td><td>{{ customer.id }}</td></tr>
+        <tr><td>创建时间</td><td>{{ customer.created_at.strftime("%Y-%m-%d %H:%M") }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>交易概览</h2>
+    <table>
+      <tbody>
+        <tr><td>历史订单数</td><td>{{ orders | length }}</td></tr>
+        <tr><td>累计消费</td><td>{{ total_spent }} CNY</td></tr>
+        <tr><td>最近订单</td><td>{{ orders[0].created_at.strftime("%Y-%m-%d %H:%M") if orders else "暂无" }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel" style="margin-top:14px;">
+  <h2>历史订单</h2>
+  <table>
+    <thead><tr><th>订单号</th><th>状态</th><th>金额</th><th>创建时间</th><th></th></tr></thead>
+    <tbody>
+    {% for order in orders %}
+      <tr>
+        <td>{{ order.id }}</td>
+        <td><span class="badge">{{ order.status | order_status_label }}</span></td>
+        <td>{{ order.total_amount }} {{ order.currency }}</td>
+        <td>{{ order.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td><a class="link" href="/admin/orders/{{ order.id }}">查看订单</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">暂无订单</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block title %}审计日志 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>审计日志</h1>
+    <div class="muted">追踪后台关键操作和执行人员</div>
+  </div>
+</div>
+
+<section class="panel">
+  <table>
+    <thead>
+      <tr>
+        <th>时间</th>
+        <th>操作人</th>
+        <th>动作</th>
+        <th>对象</th>
+        <th>说明</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for log in logs %}
+      <tr>
+        <td>{{ log.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td>{{ log.actor_email }}</td>
+        <td><span class="badge">{{ log.action }}</span></td>
+        <td>{{ log.entity_type }} / {{ log.entity_id }}</td>
+        <td>{{ log.summary }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">暂无审计日志</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

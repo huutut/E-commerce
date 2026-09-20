@@ -1,0 +1,109 @@
+{% extends "admin/base.html" %}
+{% block title %}首页 - 电商运营后台{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>首页</h1>
+    <div class="muted">运营概览与系统状态</div>
+  </div>
+  <a class="link" href="/admin/sandbox">进入流程测试</a>
+</div>
+
+<section class="grid stats">
+  <div class="panel"><div class="muted">商品数</div><div class="stat-value">{{ product_count }}</div></div>
+  <div class="panel"><div class="muted">订单数</div><div class="stat-value">{{ order_count }}</div></div>
+  <div class="panel"><div class="muted">客户数</div><div class="stat-value">{{ customer_count }}</div></div>
+  <div class="panel"><div class="muted">累计销售额</div><div class="stat-value">{{ total_revenue }} CNY</div></div>
+  <div class="panel">
+    <div class="muted">库存预警</div>
+    <div class="stat-value">{{ stock_warning_count }}</div>
+    <a class="link" href="/admin/products?low_stock=true">查看低库存</a>
+  </div>
+</section>
+
+<section class="grid two" style="margin-top:14px;">
+  <div class="panel">
+    <h2>最近商品</h2>
+    <table>
+      <thead><tr><th>SKU</th><th>商品</th><th>分类</th><th>库存</th><th>价格</th></tr></thead>
+      <tbody>
+      {% for product in products %}
+        <tr>
+          <td>{{ product.sku }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.stock_on_hand }}</td>
+          <td>{{ product.price }} {{ product.currency }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="muted">暂无商品</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>订单状态分布</h2>
+    <table>
+      <tbody>
+        {% for item in status_counts %}
+          <tr><td>{{ item.status | order_status_label }}</td><td>{{ item.count }}</td></tr>
+        {% else %}
+          <tr><td colspan="2" class="muted">暂无订单</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="grid two" style="margin-top:14px;">
+  <div class="panel">
+    <h2>低库存商品</h2>
+    <table>
+      <thead><tr><th>SKU</th><th>商品</th><th>库存/阈值</th><th>状态</th></tr></thead>
+      <tbody>
+      {% for product in low_stock_products %}
+        <tr>
+          <td>{{ product.sku }}</td>
+          <td><a class="link" href="/admin/products/{{ product.sku }}/edit">{{ product.name }}</a></td>
+          <td>{{ product.stock_on_hand }} / {{ product.low_stock_threshold }}</td>
+          <td><span class="badge">{{ product.status | product_status_label }}</span></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="muted">暂无低库存商品</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>系统状态</h2>
+    <table>
+      <tbody>
+        <tr><td>PostgreSQL</td><td class="{{ 'status-ok' if database_ok else 'status-warn' }}">{{ '正常' if database_ok else '异常' }}</td></tr>
+        <tr><td>Redis</td><td class="{{ 'status-ok' if redis_ok else 'status-warn' }}">{{ '正常' if redis_ok else '异常' }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel" style="margin-top:14px;">
+  <h2>最近订单</h2>
+  <table>
+    <thead><tr><th>订单号</th><th>客户</th><th>状态</th><th>金额</th><th>创建时间</th></tr></thead>
+    <tbody>
+    {% for order in orders %}
+      <tr>
+        <td><a class="link" href="/admin/orders/{{ order.id }}">{{ order.id }}</a></td>
+        <td><a class="link" href="/admin/customers/{{ order.customer_id }}">{{ order.customer_id }}</a></td>
+        <td><span class="badge">{{ order.status | order_status_label }}</span></td>
+        <td>{{ order.total_amount }} {{ order.currency }}</td>
+        <td>{{ order.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">暂无订单</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
